@@ -7,3 +7,5 @@ terraform-provider-mssql
 .idea
 *.iml
 builds
+vendor
+dist
