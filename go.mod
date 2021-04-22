@@ -1,4 +1,4 @@
-module github.com/maxjoehnk/terraform-provider-mssql
+module github.com/nrgribeiro/terraform-provider-mssql
 
 require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20190204142019-df6d76eb9289

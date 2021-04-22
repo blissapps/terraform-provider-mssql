@@ -1,5 +1,7 @@
 # Terraform Microsoft SQL Server Provider
 
+based on https://github.com/maxjoehnk/terraform-provider-mssql
+
 ## Usage
 ```hcl
 provider "mssql" {
@@ -10,7 +12,7 @@ provider "mssql" {
 
 resource "mssql_database" "db" {
   name = "MyDatabase"
-  owner = "${mssql_role.user.name}"
+  owner = mssql_role.user.name
 }
 
 resource "mssql_role" "user" {
