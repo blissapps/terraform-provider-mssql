@@ -3,6 +3,7 @@ package mssql
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -16,7 +17,7 @@ func resourceDatabase() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"owner": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -29,22 +30,21 @@ func resourceDatabase() *schema.Resource {
 func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 	db := m.(*sql.DB)
 	name := d.Get("name").(string)
-	_, err := db.Query(fmt.Sprintf("CREATE DATABASE %s", name))
+	owner := d.Get("owner").(string)
+	_, err := db.Query(fmt.Sprintf(`CREATE DATABASE %s`, name))
 	if err != nil {
 		return err
 	}
+	_, err = db.Exec(fmt.Sprintf("USE %s; CREATE USER %s FOR LOGIN %s; ALTER ROLE db_owner ADD MEMBER %s", name, owner, owner, owner))
+	if err != nil {
+		return err
+	}
+
 	row, err := checkTable(db, name)
 	if err != nil {
 		return err
 	}
 	d.SetId(row.name)
-	if d.Get("owner") != nil {
-		owner := d.Get("owner").(string)
-		_, err := db.Query(fmt.Sprintf("ALTER AUTHORIZATION ON DATABASE::%s TO %s", name, owner))
-		if err != nil {
-			return err
-		}
-	}
 
 	return err
 }
@@ -86,6 +86,10 @@ func resourceDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceDatabaseDelete(d *schema.ResourceData, m interface{}) error {
 	db := m.(*sql.DB)
 	name := d.Id()
-	_, err := db.Query(fmt.Sprintf("DROP DATABASE %s", name))
+	_, err := db.Exec(fmt.Sprintf("ALTER DATABASE %s SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE %s;", name, name))
+	if err != nil {
+		return err
+	}
+
 	return err
 }

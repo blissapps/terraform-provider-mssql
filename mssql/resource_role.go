@@ -3,6 +3,7 @@ package mssql
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -34,10 +35,7 @@ func resourceRoleCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	_, err = db.Query(fmt.Sprintf("CREATE USER %s FOR LOGIN %s", name, name))
-	if err != nil {
-		return err
-	}
+
 	row := db.QueryRow(fmt.Sprintf("SELECT principal_id FROM master.sys.server_principals WHERE name = '%s'", name))
 	var id int
 	if err = row.Scan(&id); err != nil {
@@ -76,12 +74,8 @@ func resourceRoleDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	dropUserQuery := fmt.Sprintf("DROP USER %s", name)
-	print(dropUserQuery)
-	_, err = db.Query(dropUserQuery)
-	if err != nil {
-		return err
-	}
-	_, err = db.Query(fmt.Sprintf("DROP LOGIN %s", name))
-	return err
+
+	_, dropLoginQuery := db.Query(fmt.Sprintf("DROP LOGIN %s", name))
+
+	return dropLoginQuery
 }
