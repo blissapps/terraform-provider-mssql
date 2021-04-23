@@ -35,7 +35,7 @@ func resourceDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec(fmt.Sprintf("USE %s; CREATE USER %s FOR LOGIN %s; ALTER ROLE db_owner ADD MEMBER %s", name, owner, owner, owner))
+	_, err = db.Exec(fmt.Sprintf("USE %[1]s]; CREATE USER %[2]s FOR LOGIN %[2]s; ALTER ROLE db_owner ADD MEMBER %[2]s", name, owner))
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func resourceDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceDatabaseDelete(d *schema.ResourceData, m interface{}) error {
 	db := m.(*sql.DB)
 	name := d.Id()
-	_, err := db.Exec(fmt.Sprintf("ALTER DATABASE %s SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE %s;", name, name))
+	_, err := db.Exec(fmt.Sprintf("ALTER DATABASE %[1]s SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE %[1]s;", name))
 	if err != nil {
 		return err
 	}
